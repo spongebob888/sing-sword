@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 pub mod dirs;
 pub mod init;
+pub mod sysopt;
+pub mod tauri_handlers;
 
 pub const IDENTIFIER: &'static str = "sing-sword.com.github.zzzgydi";
 

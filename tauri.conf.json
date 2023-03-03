@@ -1,11 +1,14 @@
 {
   "package": {
-    "productName": "sing-sword",
+    "productName": "sing-sheath",
     "version": "0.0.1"
   },
   "build": {
-    "devPath": "./resources/dist",
-    "distDir": "./tauri.conf.json"
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devPath": "http://localhost:1420",
+    "distDir": "../dist",
+    "withGlobalTauri": false
   },
   "tauri": {
     "allowlist": {
@@ -14,6 +17,14 @@
       },
       "process": {
         "all": true
+      },
+      "dialog": {
+        "all": true
+      },
+      "clipboard": {
+        "all": true, 
+        "writeText": true,
+        "readText": true
       }
     },
     "systemTray": {
@@ -28,6 +39,7 @@
         "depends": []
       },
       "externalBin": [],
+      "resources": ["resources/*"],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -35,7 +47,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "sing-sword.com.github.zzzgydi",
+      "identifier": "sing-sheath",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -44,7 +56,7 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": ["resources"],
+
       "shortDescription": "",
       "targets": "all",
       "windows": {
@@ -58,6 +70,15 @@
     },
     "updater": {
       "active": false
-    }
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "height": 600,
+        "resizable": true,
+        "title": "sing-sheath",
+        "width": 800
+      }
+    ]
   }
 }

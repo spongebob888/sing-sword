@@ -1,3 +1,5 @@
+use crate::config::ISingBox;
+
 use super::dirs;
 use anyhow::Result;
 use chrono::Local;
@@ -86,4 +88,16 @@ pub fn init_app(app_handle: &tauri::AppHandle) {
     unsafe {
         APP_VERSION = Box::leak(Box::new(pkg.version.to_string()));
     };
+}
+pub fn get_default_box_config() -> Result<ISingBox>
+{
+    let path = tauri::utils::platform::current_exe()?
+    .parent()
+    .ok_or(anyhow::anyhow!("failed to get current_exe parent"))?
+    .join("resources")
+    .join("sing-box-default.json");
+    
+    let str = std::fs::read_to_string(path)?;
+
+    serde_json::from_str(&str).map_err(|err| anyhow::anyhow!(err))
 }

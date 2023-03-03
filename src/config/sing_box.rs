@@ -1,7 +1,8 @@
-use anyhow::Result;
+use anyhow::{Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::path::PathBuf;
+use crate::utils::init;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ISingBox {
@@ -26,14 +27,18 @@ pub struct ISingBox {
 
 impl Default for ISingBox {
     fn default() -> Self {
-        ISingBox {
-            log: Some(ILog::default()),
-            dns: None,
-            route: None,
-            experimental: Some(IExperimental::default()),
-            inbounds: None,
-            outbounds: None,
+        match init::get_default_box_config() {
+            Ok(config) => config,
+            _ => ISingBox {
+                            log: Some(ILog::default()),
+                            dns: None,
+                            route: None,
+                            experimental: Some(IExperimental::default()),
+                            inbounds: None,
+                            outbounds: None,
+                        }
         }
+
     }
 }
 

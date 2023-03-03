@@ -4,6 +4,7 @@ use once_cell::sync::OnceCell;
 use parking_lot::RwLock;
 use std::sync::Arc;
 use tauri::api::process::{Command, CommandChild, CommandEvent};
+use std::{thread, time::Duration};
 
 #[derive(Debug, Clone)]
 pub struct Core {
@@ -21,11 +22,14 @@ impl Core {
 
     /// 检查sing box配置
     pub fn check_config(&self) -> Result<()> {
-        let config_dir = dirs::sing_box_dir();
+        let config_file_dir = dirs::sing_box_dir().join("config.json");
+        let config_file_dir = dirs::path_to_str(&config_file_dir)?;
+        let config_dir = dirs::sing_box_dir().join("../");
         let config_dir = dirs::path_to_str(&config_dir)?;
+
         let core_path = current_core_path()?;
         let output = Command::new_sidecar(core_path)?
-            .args(["check", "--disable-color", "-D", config_dir])
+            .args(["check","-c",config_file_dir, "--disable-color", "-D", config_dir])
             .output()?;
 
         if !output.status.success() {
@@ -35,6 +39,14 @@ impl Core {
         Ok(())
     }
 
+    pub fn stop_core(&self) -> Result<()>{
+        let mut core_handler = self.core_handler.write();
+
+        core_handler.take().map(|ch| {
+            let _ = ch.kill();
+        });
+        Ok(())
+    }
     /// 启动核心
     pub fn run_core(&self) -> Result<()> {
         self.check_config()?;
@@ -42,22 +54,24 @@ impl Core {
         let mut core_handler = self.core_handler.write();
 
         core_handler.take().map(|ch| {
+            log::info!(target: "app", "stop the core");
             let _ = ch.kill();
         });
-
+        // thread::sleep(Duration::from_millis(1000));
         let config_dir = dirs::sing_box_dir();
         let config_dir = dirs::path_to_str(&config_dir)?;
         let core_path = current_core_path()?;
         let cmd = Command::new_sidecar(&core_path)?;
 
         #[allow(unused_mut)]
+        log::info!(target: "app", "run core {core_path}");
         let (mut rx, cmd_child) = cmd
             .args(["run", "-c", "config.json", "-D", config_dir])
             .spawn()?;
 
         *core_handler = Some(cmd_child);
 
-        log::info!(target: "app", "run core {core_path}");
+
 
         #[cfg(feature = "stdout-log")]
         tauri::async_runtime::spawn(async move {

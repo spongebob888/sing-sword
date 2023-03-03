@@ -3,12 +3,12 @@ use crate::{
     notify_err, service,
     utils::{self, dirs, init},
 };
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use once_cell::sync::OnceCell;
 use std::net::SocketAddr;
 use tauri::{
     AppHandle, CustomMenuItem, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
-    SystemTraySubmenu,
+    SystemTraySubmenu, Manager, api
 };
 
 #[derive(Debug, Clone)]
@@ -46,7 +46,6 @@ impl Tray {
         }
 
         let config = SystemTrayMenu::new()
-            .add_item(CustomMenuItem::new("open_sword_config", "Sword Config"))
             .add_item(CustomMenuItem::new("open_sing_config", "SingBox Config"))
             .add_item(CustomMenuItem::new("open_core_dir", "Core Dir"))
             .add_item(CustomMenuItem::new("open_logs_dir", "Logs Dir"));
@@ -57,14 +56,13 @@ impl Tray {
         );
 
         SystemTrayMenu::new()
-            .add_item(CustomMenuItem::new("dashboard", "Dashboard"))
+            .add_item(CustomMenuItem::new("sing_sheath", "sing-sheath"))
             .add_item(CustomMenuItem::new("clash_dashboard", "Clash Dashboard"))
             .add_native_item(SystemTrayMenuItem::Separator)
             .add_submenu(SystemTraySubmenu::new(
                 "Service",
                 service
                     .add_item(CustomMenuItem::new("run_core", "Restart Core"))
-                    .add_item(CustomMenuItem::new("run_server", "Restart Server")),
             ))
             .add_submenu(SystemTraySubmenu::new("Config", config))
             .add_submenu(SystemTraySubmenu::new("About", about))
@@ -74,16 +72,18 @@ impl Tray {
 
     pub fn on_event(&self, app_handle: &AppHandle, id: &str) -> Result<()> {
         Ok(match id {
-            "dashboard" => {
-                let (port, _, secret, web_ui) = config::Sword::global().web_info();
-
-                let url = web_ui.unwrap_or(format!("http://localhost:{port}"));
-                let mut link = format!("{url}?server=127.0.0.1&port={port}");
-                if let Some(secret) = secret {
-                    link = format!("{link}&token={secret}");
-                }
-                open::that(link)?;
-            }
+            "sing_sheath" => {
+                let window = match app_handle.get_window("main") {
+                    Some(window) => match window.is_visible()? {
+                        false => {
+                            return window.show().map_err(|err|anyhow::anyhow!(err));
+                        }
+                        true => window,
+                    },
+                    None => return Err(anyhow!("Can't find main window")),
+                };
+                window.set_focus()?;
+            },
             "clash_dashboard" => {
                 let path = dirs::sing_box_path();
                 let sing_box = ISingBox::read_file(&path)?;
@@ -106,11 +106,19 @@ impl Tray {
             }
             "run_core" => notify_err!(service::Core::global().run_core())?,
             "run_server" => notify_err!(service::Web::global().run_web(app_handle))?,
-            "open_sword_config" => utils::open_by_code(&&dirs::sword_config_path())?,
             "open_sing_config" => utils::open_by_code(&dirs::sing_box_path())?,
             "open_core_dir" => open::that(dirs::core_dir()?)?,
             "open_logs_dir" => open::that(dirs::log_dir())?,
-            "quit" => app_handle.exit(0),
+            "quit" => {
+                utils::sysopt::Sysopt::global().reset_sysproxy().unwrap_or_else(|_|
+                   { 
+                    log::info!(target: "app","reset system proxy failed");
+                    ()
+                    }
+                );
+                api::process::kill_children();
+                app_handle.exit(0);
+            },
             _ => {
                 // 更换核心
                 if id.starts_with("service_core_") {
@@ -128,6 +136,26 @@ pub fn on_system_tray_event(app_handle: &AppHandle, event: SystemTrayEvent) {
     match event {
         SystemTrayEvent::MenuItemClick { id, .. } => {
             crate::log_err!(Tray::global().on_event(app_handle, id.as_str()))
+        }
+        SystemTrayEvent::LeftClick { .. } => {
+            let window = match app_handle.get_window("main") {
+                Some(window) => match window.is_visible().expect("winvis") {
+                    true => {
+                        // hide the window instead of closing due to processes not closing memory leak: https://github.com/tauri-apps/wry/issues/590
+                        window.hide().expect("winhide");
+                        // window.close().expect("winclose");
+                        return;
+
+                    }
+                    false => window,
+                },
+                None => return,
+            };
+            #[cfg(not(target_os = "macos"))]
+            {
+                window.show().unwrap();
+            }
+            window.set_focus().unwrap();
         }
         _ => {}
     }
