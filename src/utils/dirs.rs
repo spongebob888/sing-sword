@@ -44,15 +44,16 @@ pub fn sing_box_path() -> PathBuf {
     sing_box_dir().join("config.json")
 }
 
+pub fn sing_box_default_path() -> PathBuf {
+    sing_box_dir().join("sing-box-default.json")
+}
+
 pub fn log_dir() -> PathBuf {
     app_dir().join("logs")
 }
 
 pub fn core_dir() -> Result<PathBuf> {
-    Ok(tauri::utils::platform::current_exe()?
-        .parent()
-        .ok_or(anyhow::anyhow!("failed to get current_exe parent"))?
-        .join("core"))
+    Ok(sing_box_dir().join("core"))
 }
 
 pub fn resources_dir(app_handle: &AppHandle) -> Result<PathBuf> {

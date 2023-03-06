@@ -74,6 +74,23 @@ fn init_core(app_handle: &tauri::AppHandle) -> Result<()> {
     Ok(())
 }
 
+/// Copy default sing-box config file
+fn init_default_sb_config(app_handle: &tauri::AppHandle) -> Result<()> {
+    let config_dir = dirs::sing_box_default_path();
+    if !config_dir.exists() {
+        if let Some(config_pare) = config_dir.parent()
+        {
+            fs::create_dir_all(&config_pare)?;
+        }
+
+        let res_dir = dirs::resources_dir(app_handle)?.join("sing-box-default.json");
+
+        let _ = fs::copy(res_dir, config_dir);
+    }
+
+    Ok(())
+}
+
 static mut APP_VERSION: &str = "0.0.1";
 
 pub fn app_version() -> String {
@@ -83,6 +100,7 @@ pub fn app_version() -> String {
 pub fn init_app(app_handle: &tauri::AppHandle) {
     let _ = init_log();
     let _ = init_core(app_handle);
+    let _ = init_default_sb_config(app_handle);
 
     let pkg = app_handle.package_info();
     unsafe {
@@ -91,11 +109,7 @@ pub fn init_app(app_handle: &tauri::AppHandle) {
 }
 pub fn get_default_box_config() -> Result<ISingBox>
 {
-    let path = tauri::utils::platform::current_exe()?
-    .parent()
-    .ok_or(anyhow::anyhow!("failed to get current_exe parent"))?
-    .join("resources")
-    .join("sing-box-default.json");
+    let path = dirs::sing_box_default_path();
     
     let str = std::fs::read_to_string(path)?;
 
