@@ -29,7 +29,7 @@ impl Core {
 
         let core_path = current_core_path()?;
         log::debug!("checking sing-box config");
-        let output = Command::new("sing-box")
+        let output = Command::new(&core_path)
             .args(["check","-c",config_file_dir, "--disable-color", "-D", config_dir])
             .output()?;
 
