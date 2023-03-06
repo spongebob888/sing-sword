@@ -74,10 +74,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "minHeight": 600,
         "resizable": true,
         "title": "sing-sheath",
-        "width": 800
+        "minWidth": 400
       }
     ]
   }
