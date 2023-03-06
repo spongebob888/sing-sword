@@ -1,5 +1,5 @@
 use crate::{config::Sword, utils::dirs};
-use anyhow::{bail, Result};
+use anyhow::{bail, Result, anyhow};
 use once_cell::sync::OnceCell;
 use parking_lot::RwLock;
 use std::sync::Arc;
@@ -28,7 +28,8 @@ impl Core {
         let config_dir = dirs::path_to_str(&config_dir)?;
 
         let core_path = current_core_path()?;
-        let output = Command::new_sidecar(core_path)?
+        log::debug!("checking sing-box config");
+        let output = Command::new("sing-box")
             .args(["check","-c",config_file_dir, "--disable-color", "-D", config_dir])
             .output()?;
 
@@ -50,7 +51,7 @@ impl Core {
     /// 启动核心
     pub fn run_core(&self) -> Result<()> {
         self.check_config()?;
-
+        log::info!("sing-box config checked!");
         let mut core_handler = self.core_handler.write();
 
         core_handler.take().map(|ch| {
@@ -61,7 +62,7 @@ impl Core {
         let config_dir = dirs::sing_box_dir();
         let config_dir = dirs::path_to_str(&config_dir)?;
         let core_path = current_core_path()?;
-        let cmd = Command::new_sidecar(&core_path)?;
+        let cmd = Command::new(&core_path);
 
         #[allow(unused_mut)]
         log::info!(target: "app", "run core {core_path}");
@@ -134,14 +135,18 @@ impl Core {
 pub fn current_core_path() -> Result<String> {
     let core_name = Sword::global()
         .core_name()
-        .ok_or(anyhow::anyhow!("failed to get core name"))?;
+        .ok_or(anyhow!("failed to get core name"))?;
 
-    fn use_core_path(name: &str) -> String {
+    let core_dir_os_str = dirs::core_dir()?.into_os_string();
+    let core_dir = core_dir_os_str.to_str()
+    .ok_or(anyhow!("core dir to string failed"))?;
+    log::debug!("core dir:{}",core_dir);
+    fn use_core_path(core_dir:&str,name: &str) -> String {
         #[cfg(target_os = "windows")]
-        return format!("core\\{name}");
+        return format!("{core_dir}\\{name}");
         #[cfg(not(target_os = "windows"))]
-        return format!("core/{name}");
+        return format!("{core_dir}/{name}");
     }
 
-    Ok(use_core_path(&core_name))
+    Ok(use_core_path(&core_dir,&core_name))
 }
