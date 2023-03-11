@@ -47,7 +47,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "sing-sheath",
+      "identifier": "com.vincentliu77.sing-sheath",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
