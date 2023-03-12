@@ -89,7 +89,12 @@ impl Tray {
                 let sing_box = ISingBox::read_file(&path)?;
                 let sword = config::Sword::global();
                 let config = sword.config.read();
+                
+                #[cfg(not(target_os = "macos"))]
                 let default_url = "https://yacd.haishan.me/";
+                #[cfg(target_os = "macos")]
+                let default_url = "http://yacd.haishan.me/";
+
                 let url = config.clash_ui.clone().unwrap_or(default_url.into());
                 drop(config);
 

@@ -24,7 +24,10 @@ impl Default for ISword {
             web_allow_lan: false,
             web_secret: None,
             web_ui: None,
+            #[cfg(not(target_os = "macos"))]
             clash_ui: Some("https://yacd.haishan.me/".into()),
+            #[cfg(target_os = "macos")]
+            clash_ui: Some("http://yacd.haishan.me/".into()),
             core_name: None,
         }
     }
