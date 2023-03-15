@@ -73,14 +73,14 @@
     },
     "windows": [
       {
-        "fullscreen": false,
-        "minHeight": 600,
-        "resizable": true,
-        "title": "sing-sheath",
-        "minWidth": 400,
-        "width": 550,
-        "height": 700
-      }
+      "fullscreen": false,
+      "minHeight": 600,
+      "resizable": true,
+      "title": "sing-sheath",
+      "minWidth": 400,
+      "width": 550,
+      "height": 700
+    }
     ]
   }
 }
