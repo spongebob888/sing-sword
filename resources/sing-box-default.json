@@ -66,6 +66,14 @@
 			]
 		},
 		{
+			"tag": "auto",
+			"type": "urltest",
+			"interval": "24h",
+			"outbounds": [
+			  "direct"
+			]
+		},
+		{
 			"type": "direct",
 			"tag": "direct"
 		},
