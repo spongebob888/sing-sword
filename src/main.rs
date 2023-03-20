@@ -26,6 +26,7 @@ fn main() {
             notify_log_err!(sword.init_sing_box());
 
             notify_log_err!(service::Core::global().run_core());
+            notify_log_err!(service::Web::global().run_web(&app_handle));
 
             let _ = app_handle
                 .tray_handle()
