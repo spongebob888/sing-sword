@@ -85,29 +85,16 @@ impl Tray {
                 window.set_focus()?;
             },
             "clash_dashboard" => {
-                let path = dirs::sing_box_path();
-                let sing_box = ISingBox::read_file(&path)?;
-                let sword = config::Sword::global();
-                let config = sword.config.read();
-                
+                let window = match app_handle.get_window("main") {
+                    Some(window) => window,
+                    None => return Ok(()),
+                };
                 #[cfg(not(target_os = "macos"))]
-                let default_url = "https://yacd.haishan.me/";
-                #[cfg(target_os = "macos")]
-                let default_url = "http://yacd.haishan.me/";
-
-                let url = config.clash_ui.clone().unwrap_or(default_url.into());
-                drop(config);
-
-                if let Some(exp) = sing_box.experimental {
-                    if let Some(clash) = exp.clash_api {
-                        let socket: SocketAddr = clash.external_controller.parse()?;
-                        let mut link = format!("{url}?host={}&port={}", socket.ip(), socket.port());
-                        if let Some(secret) = clash.secret {
-                            link = format!("{link}&secret={secret}");
-                        }
-                        open::that(link)?;
-                    }
+                {
+                    window.show().unwrap();
                 }
+                window.set_focus().unwrap();
+                app_handle.emit_all("openBoard",  "").unwrap();
             }
             "run_core" => notify_err!(service::Core::global().run_core())?,
             "run_server" => notify_err!(service::Web::global().run_web(app_handle))?,
