@@ -66,6 +66,14 @@
 			]
 		},
 		{
+			"tag": "auto",
+			"type": "urltest",
+			"interval": "24h",
+			"outbounds": [
+				"direct"
+			]
+		},
+		{
 			"type": "direct",
 			"tag": "direct"
 		},
@@ -97,6 +105,12 @@
 				"outbound": "block"
 			}
 		],
+		"geoip": {
+			"download_detour": "auto"
+		},
+		"geosite": {
+			"download_detour": "auto"
+		},
 		"auto_detect_interface": true
 	}
 }

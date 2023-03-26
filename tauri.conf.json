@@ -1,13 +1,13 @@
 {
   "package": {
     "productName": "sing-sheath",
-    "version": "0.0.4"
+    "version": "0.1.2"
   },
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
     "devPath": "http://localhost:1420",
-    "distDir": "../dist",
+    "distDir": "../build",
     "withGlobalTauri": false
   },
   "tauri": {
