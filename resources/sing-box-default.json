@@ -27,10 +27,8 @@
 		],
 		"rules": [
 			{
-				"domain": [
-					""
-				],
-				"server": "local"
+				"outbound":"any",
+				"server":"local"
 			},
 			{
 				"geosite": "cn",
