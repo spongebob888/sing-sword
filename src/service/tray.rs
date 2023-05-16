@@ -23,6 +23,8 @@ impl Tray {
     pub fn tray_menu() -> SystemTrayMenu {
         let mut service = SystemTrayMenu::new();
         let core_name = config::Sword::global().core_name();
+        let mut profile_menu = SystemTrayMenu::new();
+        let profile_name = config::Sword::global().profile_name();
 
         if let Ok(core_list) = service::Core::list_core() {
             // if core_list.len() > 0 {
@@ -44,9 +46,19 @@ impl Tray {
                 service = service.add_native_item(SystemTrayMenuItem::Separator);
             }
         }
+        if let Ok(profile_list)= dirs::list_profile() {
+            profile_list.iter().for_each(|name| {
+                let profile_id = format!("profile_{name}");
+                let selected = Some(name) == profile_name.as_ref();
+                let title = format!("{name}");
+                let item = CustomMenuItem::new(profile_id, title);
+                let item = if selected { item.selected() } else { item };
+                profile_menu = profile_menu.to_owned().add_item(item);
+            });
+        }
 
         let config = SystemTrayMenu::new()
-            .add_item(CustomMenuItem::new("open_sing_config", "SingBox Config"))
+            .add_item(CustomMenuItem::new("open_profile_dir", "Profile Dir"))
             .add_item(CustomMenuItem::new("open_core_dir", "Core Dir"))
             .add_item(CustomMenuItem::new("open_logs_dir", "Logs Dir"));
 
@@ -63,6 +75,10 @@ impl Tray {
                 "Service",
                 service
                     .add_item(CustomMenuItem::new("run_core", "Restart Core"))
+            ))
+            .add_submenu(SystemTraySubmenu::new(
+               "Profile",
+               profile_menu
             ))
             .add_submenu(SystemTraySubmenu::new("Config", config))
             .add_submenu(SystemTraySubmenu::new("About", about))
@@ -98,7 +114,7 @@ impl Tray {
             }
             "run_core" => notify_err!(service::Core::global().run_core())?,
             "run_server" => notify_err!(service::Web::global().run_web(app_handle))?,
-            "open_sing_config" => utils::open_by_code(&dirs::sing_box_path())?,
+            "open_profile_dir" => open::that(&dirs::profile_dir())?,
             "open_core_dir" => open::that(dirs::core_dir()?)?,
             "open_logs_dir" => open::that(dirs::log_dir())?,
             "quit" => {
@@ -118,6 +134,12 @@ impl Tray {
 
                     service::Core::global().change_core(core)?;
                     app_handle.tray_handle().set_menu(Tray::tray_menu())?;
+                }
+                else if id.starts_with("profile_") {
+                    let profile = format!("{}",&id[8..]);
+                    config::Sword::global().change_profile(profile)?;
+                    app_handle.tray_handle().set_menu(Tray::tray_menu())?;
+                    app_handle.emit_all("changeProfile",  "").unwrap();
                 }
             }
         })

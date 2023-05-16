@@ -22,7 +22,7 @@ impl Core {
 
     /// 检查sing box配置
     pub fn check_config(&self) -> Result<()> {
-        let config_file_dir = dirs::sing_box_dir().join("config.json");
+        let config_file_dir = Sword::global().profile_filepath().ok_or(anyhow!("open profile path failed"))?;
         let config_file_dir = dirs::path_to_str(&config_file_dir)?;
         let config_dir = dirs::sing_box_dir().join("../");
         let config_dir = dirs::path_to_str(&config_dir)?;
@@ -63,11 +63,12 @@ impl Core {
         let config_dir = dirs::path_to_str(&config_dir)?;
         let core_path = current_core_path()?;
         let cmd = Command::new(&core_path);
-
+        let profile_path = Sword::global().profile_filepath().ok_or(anyhow!("open profile failed"))?;
+        let profile_str = dirs::path_to_str(&profile_path)?;
         #[allow(unused_mut)]
-        log::info!(target: "app", "run core {core_path}");
+        log::info!(target: "app", "run core {core_path} with profile {profile_str}");
         let (mut rx, cmd_child) = cmd
-            .args(["run", "-c", "config.json", "-D", config_dir])
+            .args(["run", "-c", profile_str, "-D", config_dir])
             .spawn()?;
 
         *core_handler = Some(cmd_child);

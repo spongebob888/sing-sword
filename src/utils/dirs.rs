@@ -39,11 +39,6 @@ pub fn sing_box_dir() -> PathBuf {
     config_dir().join("sing")
 }
 
-/// sing-box配置路径
-pub fn sing_box_path() -> PathBuf {
-    sing_box_dir().join("config.json")
-}
-
 pub fn sing_box_default_path() -> PathBuf {
     sing_box_dir().join("sing-box-default.json")
 }
@@ -70,4 +65,24 @@ pub fn path_to_str(path: &PathBuf) -> Result<&str> {
         .to_str()
         .ok_or(anyhow::anyhow!("failed to get path from {:?}", path))?;
     Ok(path_str)
+}
+
+pub fn profile_dir() -> PathBuf {
+    sing_box_dir().join("profile")
+}
+
+pub fn list_profile() -> Result<Vec<String>> {
+    let profile_dir = profile_dir();
+
+    let list = std::fs::read_dir(profile_dir)?
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().map_or(false, |f| f.is_file()))
+        .filter(|e| e.path().extension().map_or(false, |x|x=="json"))
+        .map(|e| match e.path().file_stem() {
+            Some(stem) => stem.to_os_string().into_string().ok(),
+            None => None,
+        })
+        .filter_map(|e| e)
+        .collect();
+    Ok(list)
 }

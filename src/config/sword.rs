@@ -1,10 +1,11 @@
 use super::sing_box::ISingBox;
-use crate::utils::dirs;
+use crate::utils::dirs::{self, list_profile};
 use anyhow::Result;
 use once_cell::sync::OnceCell;
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
-use std::{fs, sync::Arc};
+use std::{fs, sync::Arc, path::PathBuf};
+use crate::service::Core;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ISword {
@@ -15,6 +16,7 @@ pub struct ISword {
 
     pub clash_ui: Option<String>, // clash 的默认外部ui
     pub core_name: Option<String>,
+    pub profile_name: Option<String>, // sing-box config profile
 }
 
 impl Default for ISword {
@@ -29,6 +31,7 @@ impl Default for ISword {
             #[cfg(target_os = "macos")]
             clash_ui: Some("http://yacd.haishan.me/".into()),
             core_name: None,
+            profile_name: None,
         }
     }
 }
@@ -67,20 +70,25 @@ impl Sword {
         Ok(())
     }
 
-    pub fn init_sing_box(&self) -> Result<()> {
-        let path = dirs::sing_box_path();
-
+    pub fn init_box_config(&self) -> Result<()> {
+        if None == self.profile_filepath() {
+            let mut config = self.config.write();
+            (*config).profile_name = Some("profile".to_string());
+            drop(config);
+        }
+        let path = self.profile_filepath().unwrap();
         if !path.exists() {
             fs::create_dir_all(dirs::sing_box_dir())?;
 
             let sb = self.sing_box.read();
             let sb_str = serde_json::to_string_pretty(&*sb)?;
             fs::write(path, sb_str.as_bytes())?;
+            log::info!("create new profile");
         } else {
             let mut sb = self.sing_box.write();
             *sb = serde_json::from_str(fs::read_to_string(&path)?.as_str())?;
         }
-
+        self.save_config()?;
         Ok(())
     }
 
@@ -109,7 +117,7 @@ impl Sword {
 
     /// 保存到文件 sing/config.json
     pub fn save_sing_box(&self) -> Result<()> {
-        let path = dirs::sing_box_path();
+        let path = self.profile_filepath().expect("profile path not found");
         let sb = self.sing_box.read();
         let sb_str = serde_json::to_string_pretty(&*sb)?;
         fs::write(path, sb_str.as_bytes())?;
@@ -142,5 +150,35 @@ impl Sword {
                 }
             }
         }
+    }
+
+    pub fn profile_name(&self) -> Option<String> {
+        let config = self.config.read();
+
+        match config.profile_name.clone() {
+            Some(profile) => Some(profile),
+            None => {
+                // 默认拿列表里的第一个
+                let profile_dir = dirs::profile_dir();
+                let list = list_profile().ok()?;
+                list.get(0).map(|x|x.to_owned())
+            }
+        }
+    }
+
+    pub fn profile_filepath(&self) -> Option<PathBuf> {
+        self.profile_name().map(
+            |x| dirs::profile_dir().join(x+".json")
+        )
+    }
+
+    // if profile name is not found, a new profile will be created
+    pub fn change_profile(&self, name: String) -> Result<()>{
+        let mut config = self.config.write();
+        config.profile_name = Some(name);
+        drop(config);
+        self.init_box_config()?;
+        Core::global().run_core()?;
+        Ok(())
     }
 }

@@ -23,7 +23,7 @@ fn main() {
 
             notify_log_err!(utils::sysopt::Sysopt::global().init_sysproxy());
             notify_log_err!(sword.init_config());
-            notify_log_err!(sword.init_sing_box());
+            notify_log_err!(sword.init_box_config());
 
             notify_log_err!(service::Core::global().run_core());
             notify_log_err!(service::Web::global().run_web(&app_handle));
