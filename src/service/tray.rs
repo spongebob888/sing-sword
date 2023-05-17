@@ -138,7 +138,6 @@ impl Tray {
                 else if id.starts_with("profile_") {
                     let profile = format!("{}",&id[8..]);
                     config::Sword::global().change_profile(profile)?;
-                    app_handle.tray_handle().set_menu(Tray::tray_menu())?;
                     app_handle.emit_all("changeProfile",  "").unwrap();
                 }
             }

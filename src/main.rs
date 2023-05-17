@@ -31,6 +31,14 @@ fn main() {
             let _ = app_handle
                 .tray_handle()
                 .set_menu(service::Tray::tray_menu());
+
+            let main_window = app.get_window("main").unwrap();
+
+            // listen to the `event-name` (emitted on the `main` window)
+            let id = main_window.listen("changeProfile", move |_| {
+              log::debug!("change profile");
+              notify_log_err!(app_handle.tray_handle().set_menu(service::Tray::tray_menu()));
+            });
             Ok(())
         })
         .system_tray(SystemTray::new())
@@ -39,9 +47,12 @@ fn main() {
             tauri_handlers::run_config, 
             tauri_handlers::get_config,
             tauri_handlers::reset_proxy,
-            tauri_handlers::get_default_config
+            tauri_handlers::get_default_config,
+            tauri_handlers::get_profile_list,
+            tauri_handlers::get_selected_profile,
+            tauri_handlers::change_profile,
             ])
-        .build(tauri::generate_context!())
+            .build(tauri::generate_context!())
         .expect("failed to launch app");
 
     #[cfg(target_os = "macos")]
