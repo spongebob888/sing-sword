@@ -37,3 +37,19 @@ pub fn get_default_config() -> Result<String, String> {
     serde_json::to_string_pretty(&sing_box_config)
     .map_err(|err|err.to_string())
 }
+
+#[tauri::command]
+pub fn get_profile_list() -> Result<Vec<String>,String> {
+    utils::dirs::list_profile().map_err(|err|err.to_string())
+}
+
+#[tauri::command]
+pub fn get_selected_profile() -> Result<String,String> {
+    Sword::global().profile_name()
+    .ok_or("selected profile not found".to_string())
+}
+
+#[tauri::command]
+pub fn change_profile(name:&str) -> Result<(),String> {
+    Sword::global().change_profile(name.to_string()).map_err(|err|err.to_string())
+}
