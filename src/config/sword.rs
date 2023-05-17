@@ -78,7 +78,7 @@ impl Sword {
         }
         let path = self.profile_filepath().unwrap();
         if !path.exists() {
-            fs::create_dir_all(dirs::sing_box_dir())?;
+            fs::create_dir_all(dirs::profile_dir())?;
 
             let sb = self.sing_box.read();
             let sb_str = serde_json::to_string_pretty(&*sb)?;
