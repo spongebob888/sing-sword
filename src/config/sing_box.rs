@@ -23,6 +23,9 @@ pub struct ISingBox {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub outbounds: Option<Value>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ntp: Option<Value>,
 }
 
 impl Default for ISingBox {
@@ -31,6 +34,7 @@ impl Default for ISingBox {
             Ok(config) => config,
             _ => ISingBox {
                             log: Some(ILog::default()),
+                            ntp: None,
                             dns: None,
                             route: None,
                             experimental: Some(IExperimental::default()),
@@ -85,6 +89,12 @@ pub struct IDns {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub disable_expire: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub independent_cache: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reverse_mapping: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fakeip: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub rules: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub servers: Option<Value>,
@@ -109,6 +119,8 @@ pub struct IRoute {
     pub default_mark: Option<u16>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rules: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ip_rules: Option<Value>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -145,6 +157,10 @@ pub struct IClashAPI {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub external_ui: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub external_ui_download_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub external_ui_download_detour: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub secret: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub direct_io: Option<bool>,
@@ -165,6 +181,8 @@ impl Default for IClashAPI {
         IClashAPI {
             external_controller: default_external_controller(),
             external_ui: None,
+            external_ui_download_url: None,
+            external_ui_download_detour: None,
             secret: None,
             direct_io: None,
             default_mode: None,
