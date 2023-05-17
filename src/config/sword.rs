@@ -174,6 +174,11 @@ impl Sword {
 
     // if profile name is not found, a new profile will be created
     pub fn change_profile(&self, name: String) -> Result<()>{
+        let config = self.config.read();
+        if config.profile_name == Some(name.clone()) {
+            return Ok(());
+        }
+        drop(config);
         let mut config = self.config.write();
         config.profile_name = Some(name);
         drop(config);
