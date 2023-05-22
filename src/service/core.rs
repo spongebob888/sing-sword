@@ -2,7 +2,7 @@ use crate::{config::Sword, utils::dirs};
 use anyhow::{bail, Result, anyhow};
 use once_cell::sync::OnceCell;
 use parking_lot::RwLock;
-use std::sync::Arc;
+use std::{sync::Arc, env};
 use tauri::api::process::{Command, CommandChild, CommandEvent};
 use std::{thread, time::Duration};
 
@@ -24,7 +24,8 @@ impl Core {
     pub fn check_config(&self) -> Result<()> {
         let config_file_dir = Sword::global().profile_filepath().ok_or(anyhow!("open profile path failed"))?;
         let config_file_dir = dirs::path_to_str(&config_file_dir)?;
-        let config_dir = dirs::sing_box_dir().join("../");
+        
+        let config_dir = env::temp_dir();// use a temp dir to check config file
         let config_dir = dirs::path_to_str(&config_dir)?;
 
         let core_path = current_core_path()?;
