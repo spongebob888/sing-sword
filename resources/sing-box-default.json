@@ -103,12 +103,6 @@
 				"outbound": "block"
 			}
 		],
-		"geoip": {
-			"download_detour": "auto"
-		},
-		"geosite": {
-			"download_detour": "auto"
-		},
 		"auto_detect_interface": true
 	}
 }
