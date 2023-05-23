@@ -66,7 +66,16 @@
       }
     },
     "security": {
-      "csp": null
+      "csp": null,
+      "dangerousRemoteDomainIpcAccess":[
+        {
+          "domain":"localhost",
+          "windows":[
+            "main"
+          ],
+          "enableTauriAPI":false
+        }
+      ]
     },
     "updater": {
       "active": false
