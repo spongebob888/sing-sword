@@ -1,6 +1,7 @@
 {
 	"log": {
 		"level": "error",
+		"timestamp": true,
 		"output": "box.log"
 	},
 	"experimental": {
