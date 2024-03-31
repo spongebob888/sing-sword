@@ -83,7 +83,7 @@ impl Core {
                     CommandEvent::Terminated(_) => break,
                     CommandEvent::Error(err) => log::error!("{err}"),
                     CommandEvent::Stdout(line) => log::info!("{line}"),
-                    CommandEvent::Stderr(line) => log::info!("{line}"),
+                    CommandEvent::Stderr(line) => log::error!(target: "app", "{line}"),
                     _ => {}
                 }
             }
