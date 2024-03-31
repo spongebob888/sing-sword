@@ -6,8 +6,10 @@
 	},
 	"experimental": {
 		"clash_api": {
-			"external_controller": "127.0.0.1:9091",
-			"store_selected": true
+			"external_controller": "127.0.0.1:9091"
+		},
+		"cache_file": {
+			"enabled": true
 		}
 	},
 	"dns": {
@@ -67,7 +69,7 @@
 		{
 			"tag": "auto",
 			"type": "urltest",
-			"interval": "24h",
+			"interval": "10m",
 			"outbounds": [
 				"direct"
 			]

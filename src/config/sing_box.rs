@@ -139,6 +139,8 @@ pub struct IExperimental {
     pub clash_api: Option<IClashAPI>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub v2ray_api: Option<IV2rayAPI>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cache_file: Option<Value>,    
 }
 
 impl Default for IExperimental {
@@ -146,6 +148,7 @@ impl Default for IExperimental {
         IExperimental {
             clash_api: Some(IClashAPI::default()),
             v2ray_api: None,
+            cache_file: None,
         }
     }
 }
