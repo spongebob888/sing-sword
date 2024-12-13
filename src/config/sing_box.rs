@@ -97,6 +97,8 @@ pub struct IDns {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reverse_mapping: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub client_subnet: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub fakeip: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rules: Option<Value>,
@@ -124,7 +126,15 @@ pub struct IRoute {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rules: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub ip_rules: Option<Value>,
+    pub rule_set: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub default_network_strategy: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub default_network_type: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub default_fallback_network_type: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub default_fallback_delay: Option<String>, 
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -170,9 +180,12 @@ pub struct IClashAPI {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub secret: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub direct_io: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub default_mode: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub access_control_allow_origin: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub access_control_allow_private_network: Option<String>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub store_selected: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -191,10 +204,11 @@ impl Default for IClashAPI {
             external_ui_download_url: None,
             external_ui_download_detour: None,
             secret: None,
-            direct_io: None,
             default_mode: None,
             store_selected: None,
             cache_file: None,
+            access_control_allow_origin: None,
+            access_control_allow_private_network: None,
         }
     }
 }
