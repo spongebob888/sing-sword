@@ -26,6 +26,9 @@ pub struct ISingBox {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ntp: Option<Value>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub endpoints: Option<Value>,
 }
 
 impl Default for ISingBox {
@@ -40,6 +43,7 @@ impl Default for ISingBox {
                             experimental: Some(IExperimental::default()),
                             inbounds: None,
                             outbounds: None,
+                            endpoints: None,
                         }
         }
 
